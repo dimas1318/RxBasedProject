@@ -6,7 +6,8 @@ import io.reactivex.schedulers.Schedulers;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -14,52 +15,8 @@ import java.util.concurrent.Executor;
 public class Main {
 
     public static void main(String[] args) {
-//        System.out.println("HEllo yopta");
-
-//        Observable<String> simpleObservable = Observable.just("HEllo yopta");
-//        simpleObservable.subscribe(new DisposableObserver<String>() {
-//
-//            public void onNext(String s) {
-//                System.out.println(s);
-//            }
-//
-//            public void onError(Throwable throwable) {
-//
-//            }
-//
-//            public void onComplete() {
-//
-//            }
-//        });
-
-//        Fiber.schedule(new Runnable() {
-//            public void run() {
-//                System.out.println("start");
-//                try {
-//                    Thread.sleep(15000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                System.out.println("Hello koko");
-//            }
-//        }).awaitTermination();
-
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                System.out.println("Hello koko");
-//            }
-//        }).start();
-
-        Executor executor = Fiber::schedule;
-//        ExecutorService service = new ForkJoinPool(){
-//            @Override
-//            public void execute(Runnable task) {
-////                super.execute(task);
-//                Fiber.schedule(task);
-//            }
-//        };
-        Scheduler scheduler = Schedulers.from(executor);
+        Executor fiberExecutor = Fiber::schedule;
+        Scheduler fiberScheduler = Schedulers.from(fiberExecutor);
 
         int n = 20;
 
@@ -80,7 +37,7 @@ public class Main {
                     })
 //                    .subscribeOn(Schedulers.io())
 //                    .subscribeOn(Schedulers.computation())
-                    .subscribeOn(scheduler)
+                    .subscribeOn(fiberScheduler)
                     .subscribe(new CompletableObserver() {
 
                         @Override
@@ -143,21 +100,5 @@ public class Main {
 
     public static String getFileName(String fileName) {
         return fileName.substring(0, fileName.lastIndexOf('.'));
-    }
-
-    private static <T extends Serializable> byte[] pickle(T obj) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(obj);
-        oos.close();
-        return baos.toByteArray();
-    }
-
-    private static <T extends Serializable> T unpickle(byte[] b, Class<T> cl) throws
-            IOException, ClassNotFoundException {
-        ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        ObjectInputStream ois = new ObjectInputStream(bais);
-        Object o = ois.readObject();
-        return cl.cast(o);
     }
 }
